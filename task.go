@@ -11,236 +11,235 @@ import (
 	"strings"
 	"time"
 	"unicode"
-	
 )
 
 type clock struct {
 	hour   int
 	minute int
 }
-type sys_parametrs struct {
-	timenow     clock
-	st_time     clock
-	en_time     clock
-	hour_p      int
-	lock_table  int
-	count_table int
+type sysParametrs struct {
+	timenow    clock
+	stTime     clock
+	enTime     clock
+	hourP      int
+	lockTable  int
+	countTable int
 }
 type client struct {
-	time_in     clock
-	time_st_tab clock
-	num_tab     int
+	timeIn    clock
+	timeStTab clock
+	numTab    int
 }
 type table struct {
-	name_client string
-	revenue     int
-	sum_time    clock
+	nameClient string
+	revenue    int
+	sumTime    clock
 }
 
 // Обработчик ошибок
-func error_handling(err error) {
+func errorHandling(err error) {
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
 }
-func cl_comp(time1, time2 clock, fl *int) {
+func clockComp(time1, time2 clock, fl *int) {
 	if time2.hour < time1.hour {
 		if *fl == 0 {
-			error_handling(errors.New("Time_input_error....."))
+			errorHandling(errors.New("Time_input_error....."))
 		}
 		*fl = -1
 
 	} else if time2.hour == time1.hour && time2.minute < time1.minute {
 		if *fl == 0 {
-			error_handling(errors.New("Time_input_error....."))
+			errorHandling(errors.New("Time_input_error....."))
 		}
 		*fl = -1
 	}
 
 }
-func len_cheker(size int, n1 int, n2 int) {
+func lenCheker(size int, n1 int, n2 int) {
 	if size != n1 && size != n2 {
 		err := errors.New("Invalid string format")
-		error_handling(err)
+		errorHandling(err)
 	}
 }
-func format_checker(s string) {
+func formatChecker(s string) {
 	for _, char := range s {
 		if !(char > '0' && char < '9') && !(unicode.IsLower(char)) && char != '_' && char != '-' {
 			err := errors.New("Input name format error")
-			error_handling(err)
+			errorHandling(err)
 		}
 
 	}
 }
 
-func f_inf(scanner *bufio.Scanner) (int, [2]clock, int, [2]string) {
+func fInf(scanner *bufio.Scanner) (int, [2]clock, int, [2]string) {
 	scanner.Scan()
 	num, err := strconv.Atoi(scanner.Text())
-	error_handling(err)
+	errorHandling(err)
 
 	scanner.Scan()
 	var cl [2]clock
 	var cl_str [2]string
 	time_str := strings.Split(scanner.Text(), " ")
-	len_cheker(len(time_str), 2, 2)
+	lenCheker(len(time_str), 2, 2)
 	for i, t := range time_str {
 		cl_str[i] = t
-		len_cheker(len(t), 5, 5)
+		lenCheker(len(t), 5, 5)
 		parsedTime, err := time.Parse("15:04", t)
-		error_handling(err)
+		errorHandling(err)
 		cl[i].hour = parsedTime.Hour()
 		cl[i].minute = parsedTime.Minute()
 
 	}
 	fl := 0
-	cl_comp(cl[0], cl[1], &fl)
+	clockComp(cl[0], cl[1], &fl)
 
 	scanner.Scan()
 	payment, err := strconv.Atoi(scanner.Text())
-	error_handling(err)
+	errorHandling(err)
 	return num, cl, payment, cl_str
 
 }
-func id_13(time_er clock, str_err string, writer *bufio.Writer) {
-	writer.WriteString(fmt.Sprintf("%02d:%02d 13 %v\n", time_er.hour, time_er.minute, str_err))
+func id13(timeEr clock, strErr string, writer *bufio.Writer) {
+	writer.WriteString(fmt.Sprintf("%02d:%02d 13 %v\n", timeEr.hour, timeEr.minute, strErr))
 
 }
-func id_12(time_en clock, str_name string, writer *bufio.Writer, num_tab int) {
-	writer.WriteString(fmt.Sprintf("%02d:%02d 12 %v %v\n", time_en.hour, time_en.minute, str_name, num_tab))
+func id12(timeEn clock, strName string, writer *bufio.Writer, numTab int) {
+	writer.WriteString(fmt.Sprintf("%02d:%02d 12 %v %v\n", timeEn.hour, timeEn.minute, strName, numTab))
 
 }
-func id_11(time_en clock, str_name string, writer *bufio.Writer) {
-	writer.WriteString(fmt.Sprintf("%02d:%02d 11 %v\n", time_en.hour, time_en.minute, str_name))
+func id11(timeEn clock, strName string, writer *bufio.Writer) {
+	writer.WriteString(fmt.Sprintf("%02d:%02d 11 %v\n", timeEn.hour, timeEn.minute, strName))
 
 }
-func paym_tab(system *sys_parametrs, tables []table, gamer *client) {
-	time_gaming := system.timenow.hour*60 + system.timenow.minute - gamer.time_st_tab.hour*60 - gamer.time_st_tab.minute
-	tables[gamer.num_tab-1].sum_time.minute += time_gaming % 60
-	tables[gamer.num_tab-1].sum_time.hour += time_gaming / 60
-	if time_gaming%60 == 0 {
-		tables[gamer.num_tab-1].revenue += ((time_gaming / 60) * system.hour_p)
+func paymTab(system *sysParametrs, tables []table, gamer *client) {
+	timeGaming := system.timenow.hour*60 + system.timenow.minute - gamer.timeStTab.hour*60 - gamer.timeStTab.minute
+	tables[gamer.numTab-1].sumTime.minute += timeGaming % 60
+	tables[gamer.numTab-1].sumTime.hour += timeGaming / 60
+	if timeGaming%60 == 0 {
+		tables[gamer.numTab-1].revenue += ((timeGaming / 60) * system.hourP)
 	} else {
-		tables[gamer.num_tab-1].revenue += (((time_gaming / 60) + 1) * system.hour_p)
+		tables[gamer.numTab-1].revenue += (((timeGaming / 60) + 1) * system.hourP)
 	}
 }
-func event_handler(tables []table, num_ev int, system *sys_parametrs, client_inf map[string]client, queue *list.List, information []string, writer *bufio.Writer) {
+func eventHandler(tables []table, numEv int, system *sysParametrs, clientInf map[string]client, queue *list.List, information []string, writer *bufio.Writer) {
 	name := information[2]
-	format_checker(name)
-	gamer, ok := client_inf[name]
-	if num_ev == 1 {
-		len_cheker(len(information), 3, 3)
-		fl_st, fl_en := 1, 1
-		cl_comp(system.st_time, system.timenow, &fl_st)
-		cl_comp(system.timenow, system.en_time, &fl_en)
-		if !ok && fl_st == 1 && fl_en == 1 {
-			client_inf[name] = client{}
-			gamer = client_inf[name]
-			gamer.num_tab = 0
-			gamer.time_in = system.timenow
-			gamer.time_st_tab = clock{-1, -1}
-			client_inf[name] = gamer
+	formatChecker(name)
+	gamer, ok := clientInf[name]
+	if numEv == 1 {
+		lenCheker(len(information), 3, 3)
+		flSt, flEn := 1, 1
+		clockComp(system.stTime, system.timenow, &flSt)
+		clockComp(system.timenow, system.enTime, &flEn)
+		if !ok && flSt == 1 && flEn == 1 {
+			clientInf[name] = client{}
+			gamer = clientInf[name]
+			gamer.numTab = 0
+			gamer.timeIn = system.timenow
+			gamer.timeStTab = clock{-1, -1}
+			clientInf[name] = gamer
 
 		} else {
 			if ok {
-				id_13(system.timenow, "YouShallNotPass", writer)
+				id13(system.timenow, "YouShallNotPass", writer)
 			} else {
-				id_13(system.timenow, "NotOpenYet", writer)
+				id13(system.timenow, "NotOpenYet", writer)
 			}
 		}
-	} else if num_ev == 2 {
-		len_cheker(len(information), 4, 4)
+	} else if numEv == 2 {
+		lenCheker(len(information), 4, 4)
 		id_table, err := strconv.Atoi(information[3])
-		error_handling(err)
+		errorHandling(err)
 
 		if !ok {
-			id_13(system.timenow, "ClientUnknown", writer)
+			id13(system.timenow, "ClientUnknown", writer)
 		} else {
-			if tables[id_table-1].name_client == "" {
+			if tables[id_table-1].nameClient == "" {
 
-				if gamer.num_tab == 0 {
-					gamer.num_tab = id_table
-					gamer.time_st_tab = system.timenow
-					tables[id_table-1].name_client = name
-					system.lock_table++
-					client_inf[name] = gamer
+				if gamer.numTab == 0 {
+					gamer.numTab = id_table
+					gamer.timeStTab = system.timenow
+					tables[id_table-1].nameClient = name
+					system.lockTable++
+					clientInf[name] = gamer
 				} else {
-					paym_tab(system, tables, &gamer)
-					tables[gamer.num_tab-1].name_client = ""
-					tables[id_table-1].name_client = name
-					gamer.num_tab = id_table
-					gamer.time_st_tab = system.timenow
-					client_inf[name] = gamer
+					paymTab(system, tables, &gamer)
+					tables[gamer.numTab-1].nameClient = ""
+					tables[id_table-1].nameClient = name
+					gamer.numTab = id_table
+					gamer.timeStTab = system.timenow
+					clientInf[name] = gamer
 				}
 
 			} else {
-				id_13(system.timenow, "PlaceIsBusy", writer)
+				id13(system.timenow, "PlaceIsBusy", writer)
 			}
 
 		}
 
-	} else if num_ev == 3 {
-		len_cheker(len(information), 3, 3)
-		if system.count_table-system.lock_table != 0 {
-			id_13(system.timenow, "ICanWaitNoLonger!", writer)
-		} else if queue.Len() == system.count_table {
-			id_11(system.timenow, name, writer)
-			delete(client_inf, name)
+	} else if numEv == 3 {
+		lenCheker(len(information), 3, 3)
+		if system.countTable-system.lockTable != 0 {
+			id13(system.timenow, "ICanWaitNoLonger!", writer)
+		} else if queue.Len() == system.countTable {
+			id11(system.timenow, name, writer)
+			delete(clientInf, name)
 		} else {
 			queue.PushBack(name)
 
 		}
 
-	} else if num_ev == 4 {
-		len_cheker(len(information), 3, 3)
+	} else if numEv == 4 {
+		lenCheker(len(information), 3, 3)
 		if !ok {
-			id_13(system.timenow, "ClientUnknown", writer)
+			id13(system.timenow, "ClientUnknown", writer)
 		} else {
-			paym_tab(system, tables, &gamer)
-			tables[gamer.num_tab-1].name_client = ""
-			num := gamer.num_tab
+			paymTab(system, tables, &gamer)
+			tables[gamer.numTab-1].nameClient = ""
+			num := gamer.numTab
 
-			delete(client_inf, name)
+			delete(clientInf, name)
 			if queue.Len() != 0 {
 
 				name := fmt.Sprintf("%v", queue.Front().Value)
 				queue.Remove(queue.Front())
-				gamer := (client_inf)[name]
-				gamer.num_tab = num
-				gamer.time_st_tab = system.timenow
-				tables[num-1].name_client = name
-				client_inf[name] = gamer
-				id_12(system.timenow, name, writer, num)
+				gamer := (clientInf)[name]
+				gamer.numTab = num
+				gamer.timeStTab = system.timenow
+				tables[num-1].nameClient = name
+				clientInf[name] = gamer
+				id12(system.timenow, name, writer, num)
 
 			} else {
 
-				system.lock_table--
+				system.lockTable--
 			}
 
 		}
 	} else {
 		err := errors.New("Unknown event id")
-		error_handling(err)
+		errorHandling(err)
 	}
 
 }
-func end_worktime(id_11_arr []string, client_inf map[string]client, writer *bufio.Writer, time_end clock, tables []table, system *sys_parametrs) {
-	for el := range client_inf {
-		id_11_arr = append(id_11_arr, el)
+func endWorktime(id11Arr []string, clientInf map[string]client, writer *bufio.Writer, timeEnd clock, tables []table, system *sysParametrs) {
+	for el := range clientInf {
+		id11Arr = append(id11Arr, el)
 	}
-	sort.Strings(id_11_arr)
-	for _, el := range id_11_arr {
-		gamer := client_inf[el]
-		paym_tab(system, tables, &gamer)
-		id_11(time_end, el, writer)
-		delete(client_inf, el)
+	sort.Strings(id11Arr)
+	for _, el := range id11Arr {
+		gamer := clientInf[el]
+		paymTab(system, tables, &gamer)
+		id11(timeEnd, el, writer)
+		delete(clientInf, el)
 	}
 
 }
-func revenue_view(tables []table, writer *bufio.Writer) {
+func revenueView(tables []table, writer *bufio.Writer) {
 	for i, tab := range tables {
-		writer.WriteString(fmt.Sprintf("%v %v %02d:%02d", (i + 1), tab.revenue, tab.sum_time.hour, tab.sum_time.minute))
+		writer.WriteString(fmt.Sprintf("%v %v %02d:%02d", (i + 1), tab.revenue, tab.sumTime.hour, tab.sumTime.minute))
 		writer.WriteString("\n")
 	}
 }
@@ -249,51 +248,51 @@ func main() {
 		fmt.Println("The name of the text file is not entered...")
 		os.Exit(1)
 	}
-	filename := os.Args[1]
-	file, err := os.Open(filename)
-	error_handling(err)
+	fileName := os.Args[1]
+	file, err := os.Open(fileName)
+	errorHandling(err)
 	writer := bufio.NewWriter(os.Stdout)
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	n, work_time, hour_payment, cl_str := f_inf(scanner)
-	writer.WriteString(cl_str[0])
+	n, workTime, hourPayment, clStr := fInf(scanner)
+	writer.WriteString(clStr[0])
 	writer.WriteString("\n")
 	tables := make([]table, n)
-	client_inf := make(map[string]client)
-	var system sys_parametrs
-	system.count_table = n
-	system.st_time = work_time[0]
-	system.en_time = work_time[1]
-	system.hour_p = hour_payment
+	clientInf := make(map[string]client)
+	var system sysParametrs
+	system.countTable = n
+	system.stTime = workTime[0]
+	system.enTime = workTime[1]
+	system.hourP = hourPayment
 	queue := list.New()
-	fmt.Printf(tables[2].name_client)
+	fmt.Printf(tables[2].nameClient)
 	for scanner.Scan() {
 		writer.WriteString(scanner.Text())
 		writer.WriteString("\n")
 		information := strings.Split(scanner.Text(), " ")
-		len_cheker(len(information), 3, 4)
+		lenCheker(len(information), 3, 4)
 		t, err := time.Parse("15:04", information[0])
-		error_handling(err)
-		var time_ev clock = clock{t.Hour(), t.Minute()}
+		errorHandling(err)
+		var timeEv clock = clock{t.Hour(), t.Minute()}
 		fl := 0
-		cl_comp(system.timenow, time_ev, &fl)
-		system.timenow.hour = time_ev.hour
-		system.timenow.minute = time_ev.minute
-		num_ev, err := strconv.Atoi(information[1])
-		error_handling(err)
-		event_handler(tables, num_ev, &system, client_inf, queue, information, writer)
+		clockComp(system.timenow, timeEv, &fl)
+		system.timenow.hour = timeEv.hour
+		system.timenow.minute = timeEv.minute
+		numEv, err := strconv.Atoi(information[1])
+		errorHandling(err)
+		eventHandler(tables, numEv, &system, clientInf, queue, information, writer)
 
 	}
-	system.timenow = system.en_time
+	system.timenow = system.enTime
 
-	id_11_arr := make([]string, 0, len(client_inf))
-	if len(client_inf) != 0 {
-		end_worktime(id_11_arr, client_inf, writer, system.en_time, tables, &system)
+	id11Arr := make([]string, 0, len(clientInf))
+	if len(clientInf) != 0 {
+		endWorktime(id11Arr, clientInf, writer, system.enTime, tables, &system)
 	}
-	writer.WriteString(cl_str[1])
+	writer.WriteString(clStr[1])
 	writer.WriteString("\n")
-	revenue_view(tables, writer)
-    writer.Flush()
+	revenueView(tables, writer)
+	writer.Flush()
 
 }
